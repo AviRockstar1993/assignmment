@@ -13,6 +13,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+
 import { User } from '../components/User';
 
 function useStyles() {
@@ -60,7 +61,7 @@ function useStyles() {
         },
         safeAreaView: {
             flex: 1,
-
+            justifyContent: 'center'
         },
         subtitle: {
             color: 'rgba(235, 235, 245, 0.6)',
@@ -97,64 +98,52 @@ function useStyles() {
             fontSize: 18,
             borderRadius: 5,
             paddingVertical: 10,
-            paddingHorizontal: 10,
             borderColor: 'black',
             borderWidth: 1,
             margin: 5,
-            backgroundColor: 'white'
+            backgroundColor: 'white',
+            justifyContent: 'center'
 
         }
     });
 }
 
-const HomePage = ({ navigation }) => {
+const Details = ({ route, navigation }) => {
     const styles = useStyles();
+    const { id } = route.params;
 
-    const [data, setData] = useState<User[]>([]);
-    const renderItem = ({ item }: any) => (
-        <TouchableOpacity onPress={() => navigation.navigate('Details Page', {
-            id: item.id,
-        })}>
-            <View style={styles.alignment}>
-
-                <Text>{item.title}</Text>
-            </View>
-
-        </TouchableOpacity>
+    const [details, setDetails] = useState<User[]>([]);
 
 
-
-    );
-
-    const fetchData = async () => {
-        const resp = await fetch("https://jsonplaceholder.typicode.com/posts");
+    const getDetail = async () => {
+        const resp = await fetch(`https://jsonplaceholder.typicode.com/posts/${id}`);
         const result = await resp.json();
-        console.log(result);
-        setData(result);
+        console.log("Details:-", result);
+        setDetails(result);
 
     };
 
     useEffect(() => {
-        fetchData();
+        getDetail();
     }, []);
 
-    return (
 
+
+    return (
         <View style={styles.root}>
             <SafeAreaView style={styles.safeAreaView}>
-                <KeyboardAvoidingView
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                    style={styles.content}></KeyboardAvoidingView>
-                <FlatList
-                    data={data}
-                    renderItem={renderItem}
-                    keyExtractor={(item) => item.id.toString()}
-                />
+
+                <View style={styles.alignment}>
+                    <Text style={{ paddingBottom: 5, paddingVertical: 5 }}>{details.id}</Text>
+                    <View style={{ backgroundColor: 'black', width: '100%', height: 2 }}></View>
+                    <Text style={{ paddingBottom: 5, paddingVertical: 10 }}>{details.title}</Text>
+                    <View style={{ backgroundColor: 'black', width: '100%', height: 2 }}></View>
+                    <Text style={{ paddingBottom: 5, paddingVertical: 10 }}>{details.body}</Text>
+                </View>
             </SafeAreaView>
         </View>
-
 
     )
 }
 
-export default HomePage;
+export default Details;
