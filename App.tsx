@@ -11,23 +11,19 @@
 import React from 'react';
 import {
   SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
+  StyleSheet
 } from 'react-native';
 import Navigation from './src/navigation/Navigation';
 
 
 
 const App = () => {
- 
+
 
   return (
-   <SafeAreaView style={{flex:1}}>
-    <Navigation />
-   </SafeAreaView>
+    <SafeAreaView style={{ flex: 1 }}>
+      <Navigation />
+    </SafeAreaView>
   );
 };
 

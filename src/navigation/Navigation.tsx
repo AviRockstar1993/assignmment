@@ -1,13 +1,12 @@
 import * as React from 'react';
-import { View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createStackNavigator } from '@react-navigation/stack';
 import Login from '../screens/Login';
 import Registration from '../screens/Registration';
 import HomePage from '../screens/HomePage';
 import Details from '../screens/Details';
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 const Navigation = () => {
   return (

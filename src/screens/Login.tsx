@@ -17,11 +17,10 @@ import { Controller, useForm } from 'react-hook-form';
 import SizedBox from '../components/Sizebox';
 
 import { TextInput } from 'react-native-paper';
+import { auth } from '../../firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
-interface FormData {
-    email: string;
-    password: string;
-}
+
 
 function useStyles() {
     return StyleSheet.create({
@@ -99,6 +98,7 @@ function useStyles() {
             alignSelf: 'flex-end',
             color: 'red',
         },
+
     });
 }
 
@@ -111,14 +111,31 @@ const Login: React.FC = ({ navigation }: any) => {
 
     const styles = useStyles();
 
-    const onSubmit = () => {
+    const siginIn: any = () => {
+        try {
+            signInWithEmailAndPassword(auth, email, pass).then((userDetails: any) => {
+                console.log(userDetails);
+                Alert.alert("Email matched");
+                navigation.navigate('Home Page');
+
+            }).catch(error => {
+                console.log(error);
+                Alert.alert("Email not matched");
+
+            })
+        } catch (error) {
+            alert(error);
+        }
+    }
+
+    const onSubmit: any = () => {
         const checkPassowrd = checkPasswordValidity(pass);
         if (email.length === 0) {
             Alert.alert('email can not be empty');
         }
         else {
             if (!checkPassowrd) {
-                navigation.navigate('Home Page');
+                siginIn();
             } else {
                 Alert.alert(checkPassowrd);
             }
@@ -126,7 +143,7 @@ const Login: React.FC = ({ navigation }: any) => {
 
     }
 
-    const checkPasswordValidity = (value: any) => {
+    const checkPasswordValidity: any = (value: any) => {
         const isNonWhiteSpace = /^\S*$/;
         if (!isNonWhiteSpace.test(value)) {
             return 'Password must not contain Whitespaces.';
@@ -241,11 +258,3 @@ const Login: React.FC = ({ navigation }: any) => {
 
 export default Login;
 
-const styles = StyleSheet.create({
-    alignment: {
-        height: '100%',
-        paddingHorizontal: 30,
-        paddingTop: 30,
-        backgroundColor: 'skyblue',
-    },
-});

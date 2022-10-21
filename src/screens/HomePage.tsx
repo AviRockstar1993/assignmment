@@ -14,6 +14,7 @@ import {
     View,
 } from 'react-native';
 import { User } from '../components/User';
+import { ActivityIndicator } from 'react-native-paper';
 
 function useStyles() {
     return StyleSheet.create({
@@ -111,6 +112,7 @@ const HomePage = ({ navigation }) => {
     const styles = useStyles();
 
     const [data, setData] = useState<User[]>([]);
+    const [loader, setLoader] = useState<Boolean>(true);
     const renderItem = ({ item }: any) => (
         <TouchableOpacity onPress={() => navigation.navigate('Details Page', {
             id: item.id,
@@ -126,9 +128,12 @@ const HomePage = ({ navigation }) => {
 
     );
 
-    const fetchData = async () => {
+    const fetchData: any = async () => {
+
         const resp = await fetch("https://jsonplaceholder.typicode.com/posts");
+        setLoader(false);
         const result = await resp.json();
+
         console.log(result);
         setData(result);
 
@@ -137,6 +142,10 @@ const HomePage = ({ navigation }) => {
     useEffect(() => {
         fetchData();
     }, []);
+
+    if (loader) {
+        return <ActivityIndicator animating={true} color="blue" />;
+    }
 
     return (
 

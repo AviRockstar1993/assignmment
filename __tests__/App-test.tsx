@@ -5,10 +5,12 @@
 import 'react-native';
 import React from 'react';
 import App from '../App';
-
-// Note: test renderer must be required after react-native.
 import renderer from 'react-test-renderer';
+import { Dimensions, Platform, StatusBar } from 'react-native';
 
-it('renders correctly', () => {
-  renderer.create(<App />);
+describe('App', () => {
+  it('should render successfully', () => {
+    const { container } = render(<App />);
+    expect(container).toBeTruthy();
+  });
 });

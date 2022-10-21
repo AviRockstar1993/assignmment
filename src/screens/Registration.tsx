@@ -16,6 +16,8 @@ import {
 import SizedBox from '../components/Sizebox';
 
 import { TextInput } from 'react-native-paper';
+import { auth } from '../../firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 function useStyles() {
   return StyleSheet.create({
@@ -171,7 +173,7 @@ const Registration = ({ navigation }: any) => {
     }
   };
 
-  const handleConfirmPass = (value: any) => {
+  const handleConfirmPass: any = (value: any) => {
     setConfirmPass(value);
     if (value.length === 0) {
       setConfirmValid(true);
@@ -179,6 +181,18 @@ const Registration = ({ navigation }: any) => {
       setConfirmValid(false);
     }
   };
+
+  const handleSignUp: any = () => {
+    createUserWithEmailAndPassword(auth, email, pass).then(userCredentials => {
+      const user = userCredentials.user;
+      console.log(user);
+      Alert.alert("Registered, please login");
+      navigation.navigate('Login');
+    }).catch(error => {
+      console.log(error);
+
+    })
+  }
 
   const onSubmit = () => {
     const checkPassowrd = checkPasswordValidity(pass);
@@ -191,7 +205,7 @@ const Registration = ({ navigation }: any) => {
     } else if (pass !== confirmpass) {
       Alert.alert('Password and confirm password should be same');
     } else if (!checkPassowrd) {
-      navigation.navigate('Login');
+      handleSignUp();
     } else {
       Alert.alert(checkPassowrd);
     }

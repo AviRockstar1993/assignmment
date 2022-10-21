@@ -15,6 +15,7 @@
 #import <ReactCommon/RCTTurboModuleManager.h>
 
 #import <react/config/ReactNativeConfig.h>
+#import <Firebase.h>
 
 static NSString *const kRNConcurrentRoot = @"concurrentRoot";
 
@@ -45,7 +46,8 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
 
   NSDictionary *initProps = [self prepareInitialProps];
   UIView *rootView = RCTAppSetupDefaultRootView(bridge, @"MyApp", initProps);
-
+  
+  
   if (@available(iOS 13.0, *)) {
     rootView.backgroundColor = [UIColor systemBackgroundColor];
   } else {

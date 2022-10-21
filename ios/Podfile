@@ -1,5 +1,6 @@
 require_relative '../node_modules/react-native/scripts/react_native_pods'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
+$RNFirebaseAsStaticFramework = true
 
 platform :ios, '12.4'
 install! 'cocoapods', :deterministic_uuids => false
@@ -9,7 +10,10 @@ target 'MyApp' do
 
   # Flags change depending on the env values.
   flags = get_default_flags()
-
+  pod 'Firebase', :modular_headers => true
+  pod 'FirebaseCoreInternal', :modular_headers => true
+  pod 'GoogleUtilities', :modular_headers => true
+  
   use_react_native!(
     :path => config[:reactNativePath],
     # Hermes is now enabled by default. Disable by setting this flag to false.
@@ -24,9 +28,12 @@ target 'MyApp' do
     :flipper_configuration => FlipperConfiguration.enabled,
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
+    
   )
+  
 
   target 'MyAppTests' do
+    pod 'FirebaseCore', :modular_headers => true
     inherit! :complete
     # Pods for testing
   end

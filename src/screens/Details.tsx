@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 
 import { User } from '../components/User';
+import { ActivityIndicator } from 'react-native-paper';
 
 function useStyles() {
     return StyleSheet.create({
@@ -104,6 +105,24 @@ function useStyles() {
             backgroundColor: 'white',
             justifyContent: 'center'
 
+        },
+        textStyleId: {
+            paddingBottom: 5,
+            paddingVertical: 5
+        },
+        customView: {
+            backgroundColor: 'black',
+            width: '100%',
+            height: 2
+        },
+        textStyleTitle: {
+            paddingBottom: 5,
+            paddingVertical: 10
+        },
+        textStyleBody: {
+            paddingBottom: 5,
+            paddingVertical: 10,
+            paddingHorizontal: 5
         }
     });
 }
@@ -113,10 +132,12 @@ const Details = ({ route, navigation }) => {
     const { id } = route.params;
 
     const [details, setDetails] = useState<User[]>([]);
+    const [loader, setLoader] = useState<Boolean>(true);
 
 
     const getDetail = async () => {
         const resp = await fetch(`https://jsonplaceholder.typicode.com/posts/${id}`);
+        setLoader(false);
         const result = await resp.json();
         console.log("Details:-", result);
         setDetails(result);
@@ -127,18 +148,20 @@ const Details = ({ route, navigation }) => {
         getDetail();
     }, []);
 
-
+    if (loader) {
+        return <ActivityIndicator animating={true} color="blue" />;
+    }
 
     return (
         <View style={styles.root}>
             <SafeAreaView style={styles.safeAreaView}>
 
                 <View style={styles.alignment}>
-                    <Text style={{ paddingBottom: 5, paddingVertical: 5 }}>{details.id}</Text>
-                    <View style={{ backgroundColor: 'black', width: '100%', height: 2 }}></View>
-                    <Text style={{ paddingBottom: 5, paddingVertical: 10 }}>{details.title}</Text>
-                    <View style={{ backgroundColor: 'black', width: '100%', height: 2 }}></View>
-                    <Text style={{ paddingBottom: 5, paddingVertical: 10 }}>{details.body}</Text>
+                    <Text style={styles.textStyleId}>{details.id}</Text>
+                    <View style={styles.customView}></View>
+                    <Text style={styles.textStyleTitle}>{details.title}</Text>
+                    <View style={styles.customView}></View>
+                    <Text style={styles.textStyleBody}>{details.body}</Text>
                 </View>
             </SafeAreaView>
         </View>
