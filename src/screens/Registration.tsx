@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 
 import {
   Alert,
@@ -15,90 +15,11 @@ import {
 
 import SizedBox from '../components/Sizebox';
 
-import { TextInput } from 'react-native-paper';
-import { auth } from '../../firebase';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import {TextInput} from 'react-native-paper';
+import {auth} from '../../firebase';
+import {createUserWithEmailAndPassword} from 'firebase/auth';
 
-function useStyles() {
-  return StyleSheet.create({
-    button: {
-      alignItems: 'center',
-      backgroundColor: 'rgb(93, 95, 222)',
-      borderRadius: 8,
-      height: 48,
-      justifyContent: 'center',
-    },
-    buttonTitle: {
-      color: '#FFFFFF',
-      fontSize: 17,
-      fontWeight: '600',
-      lineHeight: 22,
-    },
-    content: {
-      flex: 1,
-      justifyContent: 'center',
-      paddingHorizontal: 16,
-      paddingVertical: 32,
-    },
-    forgotPasswordContainer: {
-      alignItems: 'flex-end',
-    },
-    form: {
-      alignItems: 'center',
-      backgroundColor: 'rgb(58, 58, 60)',
-      borderRadius: 8,
-      flexDirection: 'row',
-      height: 48,
-      paddingHorizontal: 16,
-    },
-    label: {
-      color: 'rgba(235, 235, 245, 0.6)',
-      fontSize: 15,
-      fontWeight: '400',
-      lineHeight: 20,
-      width: 80,
-    },
-    root: {
-      backgroundColor: '#000000',
-      flex: 1,
-    },
-    safeAreaView: {
-      flex: 1,
-    },
-    subtitle: {
-      color: 'rgba(235, 235, 245, 0.6)',
-      fontSize: 17,
-      fontWeight: '400',
-      lineHeight: 22,
-    },
-    textButton: {
-      color: '#FFFFFF',
-      fontSize: 15,
-      fontWeight: '400',
-      lineHeight: 20,
-    },
-    textInput: {
-      color: '#FFFFFF',
-      flex: 1,
-    },
-    title: {
-      color: '#FFFFFF',
-      fontSize: 28,
-      fontWeight: '700',
-      lineHeight: 34,
-    },
-    text: {
-      color: 'white',
-      fontWeight: '700',
-    },
-    textFailed: {
-      alignSelf: 'flex-end',
-      color: 'red',
-    },
-  });
-}
-
-const Registration = ({ navigation }: any) => {
+const Registration = ({navigation}: any) => {
   const [name, setName] = useState<String>('');
   const [email, setEmail] = useState<String>('');
   const [pass, setPass] = useState<String>('');
@@ -108,9 +29,7 @@ const Registration = ({ navigation }: any) => {
   const [passValid, setPassValid] = useState<Boolean>(false);
   const [confirmValid, setConfirmValid] = useState<Boolean>(false);
 
-  const styles = useStyles();
-
-  function checkPasswordValidity(value: string) {
+  function checkPasswordValidity(value: string): any {
     const isNonWhiteSpace = /^\S*$/;
     if (!isNonWhiteSpace.test(value)) {
       return 'Password must not contain Whitespaces.';
@@ -183,16 +102,17 @@ const Registration = ({ navigation }: any) => {
   };
 
   const handleSignUp: any = () => {
-    createUserWithEmailAndPassword(auth, email, pass).then(userCredentials => {
-      const user = userCredentials.user;
-      console.log(user);
-      Alert.alert("Registered, please login");
-      navigation.navigate('Login');
-    }).catch(error => {
-      console.log(error);
-
-    })
-  }
+    createUserWithEmailAndPassword(auth, email, pass)
+      .then(userCredentials => {
+        const user = userCredentials.user;
+        console.log(user);
+        Alert.alert('Registered, please login');
+        navigation.navigate('Login');
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
 
   const onSubmit = () => {
     const checkPassowrd = checkPasswordValidity(pass);
@@ -220,7 +140,7 @@ const Registration = ({ navigation }: any) => {
             style={styles.content}>
             <View>
               <TextInput
-                style={{ marginTop: 10 }}
+                style={{marginTop: 10}}
                 label="Name"
                 value={name}
                 autoCapitalize="none"
@@ -234,7 +154,7 @@ const Registration = ({ navigation }: any) => {
               )}
 
               <TextInput
-                style={{ marginTop: 10 }}
+                style={{marginTop: 10}}
                 label="Email"
                 value={email}
                 autoCapitalize="none"
@@ -247,7 +167,7 @@ const Registration = ({ navigation }: any) => {
                 <Text style={styles.textFailed}> </Text>
               )}
               <TextInput
-                style={{ marginTop: 10 }}
+                style={{marginTop: 10}}
                 label="Password"
                 value={pass}
                 mode="outlined"
@@ -262,7 +182,7 @@ const Registration = ({ navigation }: any) => {
               )}
 
               <TextInput
-                style={{ marginTop: 10 }}
+                style={{marginTop: 10}}
                 label="Confirm Password"
                 value={confirmpass}
                 mode="outlined"
@@ -292,4 +212,79 @@ const Registration = ({ navigation }: any) => {
 
 export default Registration;
 
-
+const styles = StyleSheet.create({
+  button: {
+    alignItems: 'center',
+    backgroundColor: 'rgb(93, 95, 222)',
+    borderRadius: 8,
+    height: 48,
+    justifyContent: 'center',
+  },
+  buttonTitle: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '600',
+    lineHeight: 22,
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 32,
+  },
+  forgotPasswordContainer: {
+    alignItems: 'flex-end',
+  },
+  form: {
+    alignItems: 'center',
+    backgroundColor: 'rgb(58, 58, 60)',
+    borderRadius: 8,
+    flexDirection: 'row',
+    height: 48,
+    paddingHorizontal: 16,
+  },
+  label: {
+    color: 'rgba(235, 235, 245, 0.6)',
+    fontSize: 15,
+    fontWeight: '400',
+    lineHeight: 20,
+    width: 80,
+  },
+  root: {
+    backgroundColor: 'orange',
+    flex: 1,
+  },
+  safeAreaView: {
+    flex: 1,
+  },
+  subtitle: {
+    color: 'rgba(235, 235, 245, 0.6)',
+    fontSize: 17,
+    fontWeight: '400',
+    lineHeight: 22,
+  },
+  textButton: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '400',
+    lineHeight: 20,
+  },
+  textInput: {
+    color: '#FFFFFF',
+    flex: 1,
+  },
+  title: {
+    color: '#FFFFFF',
+    fontSize: 28,
+    fontWeight: '700',
+    lineHeight: 34,
+  },
+  text: {
+    color: 'white',
+    fontWeight: '700',
+  },
+  textFailed: {
+    alignSelf: 'flex-end',
+    color: 'red',
+  },
+});

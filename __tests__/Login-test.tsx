@@ -1,14 +1,10 @@
-/**
- * @format
- */
-
 import 'react-native';
 import React from 'react';
-import App from '../App';
+import Login from '../src/screens/Login';
 
-describe('App', () => {
+describe('Login', () => {
   it('should render successfully', () => {
-    const { container } = render(<App />);
+    const {container} = render(<Login />);
     expect(container).toBeTruthy();
   });
 });
