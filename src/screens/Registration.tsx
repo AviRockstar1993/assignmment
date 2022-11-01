@@ -150,9 +150,22 @@ const Registration = ({navigation}: any) => {
   };
 
   const handleConfirm = date => {
+    let current = new Date();
+    let todaysDate =
+      current.getDate() +
+      '-' +
+      (current.getMonth() + 1) +
+      '-' +
+      current.getFullYear();
+
     let dateTimeString =
       date.getDate() + '-' + (date.getMonth() + 1) + '-' + date.getFullYear();
-    setText(dateTimeString);
+    if (todaysDate === text) {
+      setText('');
+      Alert.alert('Date of birth should be less than current date');
+    } else {
+      setText(dateTimeString);
+    }
 
     hideDatePicker();
   };
