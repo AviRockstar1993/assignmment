@@ -1,9 +1,10 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 
 import {
   Alert,
   Keyboard,
   KeyboardAvoidingView,
+  ScrollView,
   Platform,
   SafeAreaView,
   StyleSheet,
@@ -11,23 +12,31 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-  Button,
+  Image,
   TextInput,
+  PermissionsAndroid,
+  ToastAndroid,
 } from 'react-native';
-import {RadioButton} from 'react-native-paper';
+import {Button, RadioButton} from 'react-native-paper';
 import {Dropdown} from 'react-native-element-dropdown';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import SizedBox from '../components/Sizebox';
-import Fontisto from 'react-native-vector-icons/Fontisto';
-import Feather from 'react-native-vector-icons/Feather';
-import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 import {auth} from '../../firebase';
 import {createUserWithEmailAndPassword} from 'firebase/auth';
+import {openDatabase} from 'react-native-sqlite-storage';
+import ImagePicker from 'react-native-image-crop-picker';
 
+var db = openDatabase(
+  {name: 'ListDatabase.db'},
+  () => {},
+  error => {
+    console.log(error);
+  },
+);
 const Registration = ({navigation}: any) => {
   const data = [
     {label: 'Post Graduate', value: '1'},
@@ -49,8 +58,11 @@ const Registration = ({navigation}: any) => {
   const [passValid, setPassValid] = useState<Boolean>(false);
   const [confirmValid, setConfirmValid] = useState<Boolean>(false);
   const [value, setValue] = useState<String>('');
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState<Boolean>(false);
   const [text, setText] = useState<String>('');
+  const [address, setAddress] = useState<String>('');
+  const [addressValid, setAddressValid] = useState<Boolean>(false);
+  const [filePath, setFilePath] = useState<any>({});
 
   function checkPasswordValidity(value: string): any {
     const isNonWhiteSpace = /^\S*$/;
@@ -81,7 +93,7 @@ const Registration = ({navigation}: any) => {
     return null;
   }
 
-  const handleFName = (value: any) => {
+  const handleFName = value => {
     setFName(value);
     if (value.length === 0 && value.length <= 3) {
       setFNameValid(true);
@@ -89,7 +101,7 @@ const Registration = ({navigation}: any) => {
       setFNameValid(false);
     }
   };
-  const handleLName = (value: any) => {
+  const handleLName = value => {
     setLName(value);
     if (value.length === 0 && value.length <= 3) {
       setLNameValid(true);
@@ -98,7 +110,7 @@ const Registration = ({navigation}: any) => {
     }
   };
 
-  const handleNumber = (value: any) => {
+  const handleNumber = value => {
     setPhone(value);
     if (value.length === 0 && value.length <= 3) {
       setPhoneValid(true);
@@ -107,7 +119,7 @@ const Registration = ({navigation}: any) => {
     }
   };
 
-  const handleCheckEmail = (text: any) => {
+  const handleCheckEmail = text => {
     let re = /\S+@\S+\.\S+/;
     let regex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im;
 
@@ -121,7 +133,7 @@ const Registration = ({navigation}: any) => {
     }
   };
 
-  const handlePass = (value: any) => {
+  const handlePass = value => {
     setPass(value);
     if (value.length === 0) {
       setPassValid(true);
@@ -132,7 +144,7 @@ const Registration = ({navigation}: any) => {
     }
   };
 
-  const handleConfirmPass: any = (value: any) => {
+  const handleConfirmPass = value => {
     setConfirmPass(value);
     if (value.length === 0) {
       setConfirmValid(true);
@@ -160,27 +172,79 @@ const Registration = ({navigation}: any) => {
 
     let dateTimeString =
       date.getDate() + '-' + (date.getMonth() + 1) + '-' + date.getFullYear();
-    if (todaysDate === text) {
+    if (text !== todaysDate.toString()) {
+      setText(dateTimeString);
+    } else {
       setText('');
       Alert.alert('Date of birth should be less than current date');
-    } else {
-      setText(dateTimeString);
     }
 
     hideDatePicker();
   };
 
-  const handleSignUp: any = () => {
-    createUserWithEmailAndPassword(auth, email, pass)
-      .then(userCredentials => {
-        const user = userCredentials.user;
-        console.log(user);
-        Alert.alert('Registered, please login');
-        navigation.navigate('Login');
+  const handleAddress = value => {
+    setAddress(value);
+    if (value.length === 0) {
+      setAddressValid(true);
+    } else {
+      setAddressValid(false);
+    }
+  };
+
+  const chooseFile = async () => {
+    await ImagePicker.openCamera({
+      cropping: true,
+      width: 500,
+      height: 500,
+      cropperCircleOverlay: true,
+      compressImageMaxWidth: 640,
+      compressImageMaxHeight: 480,
+      freeStyleCropEnabled: true,
+    })
+      .then(image => {
+        console.log(image);
+        console.log(image.path);
+
+        setFilePath({
+          uri: image.path,
+          // width: 40,
+          // height: 40,
+          // mime: image.mime,
+          // filename: image.filename,
+        });
       })
       .catch(error => {
         console.log(error);
       });
+  };
+
+  const handleSignUp = () => {
+    // createUserWithEmailAndPassword(auth, email, pass)
+    //   .then(userCredentials => {
+    //     const user = userCredentials.user;
+    //     console.log(user);
+    //     Alert.alert('Registered, please login');
+    //     navigation.navigate('Login');
+    //   })
+    //   .catch(error => {
+    //     console.log(error);
+    //   });
+
+    db.transaction(function (tx) {
+      tx.executeSql(
+        'INSERT INTO table_user (user_fname, user_lname, user_email,user_address,user_image) VALUES (?,?,?,?,?)',
+        [fname, lname, email, address, JSON.stringify(filePath)],
+        (tx, results) => {
+          console.log('Results', results.rowsAffected);
+          if (results.rowsAffected > 0) {
+            Alert.alert('Registration success');
+            navigation.navigate('ListPage');
+          } else {
+            Alert.alert('Registration Failed');
+          }
+        },
+      );
+    });
   };
 
   const onSubmit = () => {
@@ -215,8 +279,8 @@ const Registration = ({navigation}: any) => {
       Alert.alert('You must choose Education');
     } else if (text.length === 0) {
       Alert.alert('Date of birth can not be empty');
-    } else if (text === todaysDate) {
-      Alert.alert('Date of birth should be less than current date');
+    } else if (address.length === 0) {
+      Alert.alert('Address can not be empty');
     } else if (!checkPassowrd) {
       handleSignUp();
     } else {
@@ -233,14 +297,7 @@ const Registration = ({navigation}: any) => {
               behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
               style={styles.content}>
               <View>
-                <Text style={{marginLeft: 10, fontWeight: 'bold'}}>
-                  FirstName*
-                </Text>
                 <View style={styles.searchSection}>
-                  <Fontisto
-                    name="person"
-                    style={{paddingTop: 3, paddingLeft: 5}}
-                  />
                   <TextInput
                     style={styles.input}
                     placeholder="Enter your First Name here"
@@ -262,10 +319,6 @@ const Registration = ({navigation}: any) => {
                   LastName*
                 </Text>
                 <View style={styles.searchSection}>
-                  <Fontisto
-                    name="person"
-                    style={{paddingTop: 3, paddingLeft: 5}}
-                  />
                   <TextInput
                     style={styles.input}
                     placeholder="Enter your Last Name here"
@@ -287,10 +340,6 @@ const Registration = ({navigation}: any) => {
                   Phone Number*
                 </Text>
                 <View style={styles.searchSection}>
-                  <Feather
-                    name="phone"
-                    style={{paddingTop: 3, paddingLeft: 5}}
-                  />
                   <TextInput
                     style={styles.input}
                     keyboardType="phone-pad"
@@ -311,10 +360,6 @@ const Registration = ({navigation}: any) => {
 
                 <Text style={{marginLeft: 10, fontWeight: 'bold'}}>Email*</Text>
                 <View style={styles.searchSection}>
-                  <Entypo
-                    name="message"
-                    style={{paddingTop: 3, paddingLeft: 5}}
-                  />
                   <TextInput
                     style={styles.input}
                     placeholder="Email"
@@ -359,7 +404,6 @@ const Registration = ({navigation}: any) => {
                 </Text>
 
                 <View style={styles.searchSection}>
-                  <Entypo name="lock" style={{paddingTop: 3, paddingLeft: 5}} />
                   <TextInput
                     style={styles.input}
                     placeholder="Password"
@@ -380,7 +424,6 @@ const Registration = ({navigation}: any) => {
                   Confirm Password*
                 </Text>
                 <View style={styles.searchSection}>
-                  <Entypo name="lock" style={{paddingTop: 3, paddingLeft: 5}} />
                   <TextInput
                     style={styles.input}
                     placeholder="Confirm Password"
@@ -440,6 +483,44 @@ const Registration = ({navigation}: any) => {
                     />
                   </View>
                 </TouchableOpacity>
+                <View
+                  style={{marginLeft: 10, fontWeight: 'bold', marginTop: 10}}>
+                  <Text>Address*</Text>
+                </View>
+
+                <View style={styles.searchSection}>
+                  <TextInput
+                    style={styles.input}
+                    keyboardType="default"
+                    placeholder="Please enter valid address"
+                    value={address}
+                    underlineColorAndroid="transparent"
+                    onChangeText={handleAddress}
+                    underlineColor="transparent"
+                  />
+                </View>
+                {addressValid ? (
+                  <Text style={styles.textFailed}>
+                    Address can not be empty
+                  </Text>
+                ) : (
+                  <Text style={styles.textFailed}> </Text>
+                )}
+
+                <View style={{alignItems: 'center'}}>
+                  <TouchableOpacity
+                    activeOpacity={0.5}
+                    style={styles.buttonStyle}
+                    onPress={chooseFile}>
+                    <Text style={styles.textStyle}>Choose Image</Text>
+                  </TouchableOpacity>
+
+                  <Image
+                    source={{uri: filePath.uri}}
+                    style={styles.imageStyle}
+                  />
+                  {/* <Text style={styles.textStyle}>{filePath.uri}</Text> */}
+                </View>
               </View>
 
               <SizedBox height={20} />
@@ -535,15 +616,18 @@ const styles = StyleSheet.create({
   input: {
     padding: 10,
     flex: 1,
+    height: 40,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
   },
   searchSection: {
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    height: 40,
+
     margin: 10,
-    borderWidth: 1,
+    height: 40,
   },
   gender: {
     fontSize: 15,
@@ -580,5 +664,20 @@ const styles = StyleSheet.create({
   datePickerStyle: {
     width: 200,
     marginTop: 20,
+  },
+  textStyle: {
+    padding: 10,
+    color: 'black',
+  },
+  imageStyle: {
+    width: '100%',
+    height: 40,
+    margin: 5,
+  },
+  buttonStyle: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    backgroundColor: '#DDDDDD',
+    padding: 5,
   },
 });
