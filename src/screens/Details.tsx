@@ -139,55 +139,57 @@ function useStyles() {
 
 const Details = ({route, navigation}: any) => {
   const styles = useStyles();
-  const {id} = route.params;
+  const {item} = route.params;
 
-  const [details, setDetails] = useState<User[]>([]);
-  const [loader, setLoader] = useState<Boolean>(true);
+  // const [details, setDetails] = useState<User[]>([]);
+  // const [loader, setLoader] = useState<Boolean>(true);
 
-  const getDetail = async () => {
-    const resp = await fetch(
-      `https://jsonplaceholder.typicode.com/posts/${id}`,
-    );
-    setLoader(false);
-    const result = await resp.json();
-    console.log('Details:-', result);
-    setDetails(result);
-  };
+  // const getDetail = async () => {
+  //   const resp = await fetch(
+  //     `https://jsonplaceholder.typicode.com/posts/${id}`,
+  //   );
+  //   setLoader(false);
+  //   const result = await resp.json();
+  //   console.log('Details:-', result);
+  //   setDetails(result);
+  // };
 
   useEffect(() => {
-    getDetail();
+    // getDetail();
   }, []);
 
-  const signOutNow = () => {
-    signOut(auth)
-      .then(() => {
-        // Sign-out successful.
-        navigation.replace('Login');
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  };
+  // const signOutNow = () => {
+  //   signOut(auth)
+  //     .then(() => {
+  //       // Sign-out successful.
+  //       navigation.replace('Login');
+  //     })
+  //     .catch(error => {
+  //       console.log(error);
+  //     });
+  // };
 
-  if (loader) {
-    return <ActivityIndicator animating={true} color="blue" />;
-  }
+  // if (loader) {
+  //   return <ActivityIndicator animating={true} color="blue" />;
+  // }
 
   return (
     <View style={styles.root}>
       <SafeAreaView style={styles.safeAreaView}>
         <View style={styles.alignment}>
-          <Text style={styles.textStyleId}>{details.id}</Text>
+          <Text style={styles.textStyleId}>
+            {item.user_fname + ' ' + item.user_lname}
+          </Text>
           <View style={styles.customView}></View>
-          <Text style={styles.textStyleTitle}>{details.title}</Text>
+          <Text style={styles.textStyleTitle}>{item.user_email}</Text>
           <View style={styles.customView}></View>
-          <Text style={styles.textStyleBody}>{details.body}</Text>
+          <Text style={styles.textStyleBody}>{item.user_address}</Text>
         </View>
-        <TouchableOpacity onPress={signOutNow}>
+        {/* <TouchableOpacity onPress={signOutNow}>
           <View style={styles.signOutView}>
             <Text style={styles.signOutText}>Sign Out</Text>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </SafeAreaView>
     </View>
   );

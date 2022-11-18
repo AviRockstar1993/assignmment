@@ -261,7 +261,7 @@ const Login: React.FC = ({navigation}: any) => {
             </TouchableOpacity>
             <SizedBox height={16} />
             <TouchableOpacity
-              onPress={() => navigation.navigate('Registration Page')}>
+              onPress={() => navigation.navigate('RegistrationPage')}>
               <View style={{alignItems: 'center'}}>
                 <Text style={styles.buttonTitle}>New User? Register Here</Text>
               </View>

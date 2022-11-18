@@ -6,6 +6,7 @@ import {
   View,
   SafeAreaView,
   Image,
+  TouchableOpacity,
   StyleSheet,
 } from 'react-native';
 
@@ -152,8 +153,8 @@ const ListScreen = ({navigation}: any) => {
   };
 
   let listItemView = item => {
-    console.log('Item:-', item.user_image);
-    let img;
+    console.log('ItemImage:-', item.user_image);
+
     // if (
     //   typeof item.user_image == 'string' &&
     //   item.user_image != '[object Object]'
@@ -161,23 +162,30 @@ const ListScreen = ({navigation}: any) => {
     //   img = JSON.parse(item.user_image);
     // }
 
-    img = JSON.parse(item.user_image);
+    let img = item.user_image;
 
     return (
       <View key={item.user_id} style={{padding: 20}}>
-        <View style={{flexDirection: 'row'}}>
-          <Image
-            source={{
-              uri: img.uri,
-            }}
-            style={styles.profileImg}
-          />
-          <View style={{flexDirection: 'column', padding: 15}}>
-            <Text>Name: {item.user_fname + ' ' + item.user_lname}</Text>
-            <Text>Email: {item.user_email}</Text>
-            <Text>Address: {item.user_address}</Text>
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate('Details Page', {
+              item: item,
+            })
+          }>
+          <View style={{flexDirection: 'row'}}>
+            <Image
+              source={{
+                uri: img,
+              }}
+              style={styles.profileImg}
+            />
+            <View style={{flexDirection: 'column', padding: 15}}>
+              <Text>Name: {item.user_fname + ' ' + item.user_lname}</Text>
+              <Text>Email: {item.user_email}</Text>
+              <Text>Address: {item.user_address}</Text>
+            </View>
           </View>
-        </View>
+        </TouchableOpacity>
       </View>
     );
   };

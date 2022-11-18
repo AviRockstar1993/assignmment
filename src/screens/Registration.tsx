@@ -29,6 +29,8 @@ import {auth} from '../../firebase';
 import {createUserWithEmailAndPassword} from 'firebase/auth';
 import {openDatabase} from 'react-native-sqlite-storage';
 import ImagePicker from 'react-native-image-crop-picker';
+import {Asset, launchCamera} from 'react-native-image-picker';
+import {TextComponent} from '../components/TextComponent';
 
 var db = openDatabase(
   {name: 'ListDatabase.db'},
@@ -63,6 +65,7 @@ const Registration = ({navigation}: any) => {
   const [address, setAddress] = useState<String>('');
   const [addressValid, setAddressValid] = useState<Boolean>(false);
   const [filePath, setFilePath] = useState<any>({});
+  const [photo, setPhoto] = useState<Asset | null>(null);
 
   function checkPasswordValidity(value: string): any {
     const isNonWhiteSpace = /^\S*$/;
@@ -191,31 +194,58 @@ const Registration = ({navigation}: any) => {
     }
   };
 
-  const chooseFile = async () => {
-    await ImagePicker.openCamera({
-      cropping: true,
-      width: 500,
-      height: 500,
-      cropperCircleOverlay: true,
-      compressImageMaxWidth: 640,
-      compressImageMaxHeight: 480,
-      freeStyleCropEnabled: true,
-    })
-      .then(image => {
-        console.log(image);
-        console.log(image.path);
+  // const chooseFile = async () => {
+  //   await ImagePicker.openCamera({
+  //     cropping: true,
+  //     width: 500,
+  //     height: 500,
+  //     cropperCircleOverlay: true,
+  //     compressImageMaxWidth: 640,
+  //     compressImageMaxHeight: 480,
+  //     freeStyleCropEnabled: true,
+  //   })
+  //     .then(image => {
+  //       console.log(image);
+  //       console.log(image.path);
+  //       console.log('ImagePath:-', image.filename);
 
-        setFilePath({
-          uri: image.path,
-          // width: 40,
-          // height: 40,
-          // mime: image.mime,
-          // filename: image.filename,
-        });
-      })
-      .catch(error => {
-        console.log(error);
+  //       setFilePath({
+  //         uri: image.path,
+  //         // width: 40,
+  //         // height: 40,
+  //         // mime: image.mime,
+  //         // filename: image.filename,
+  //       });
+  //     })
+  //     .catch(error => {
+  //       console.log(error);
+  //     });
+  // };
+
+  const handleChoosePhoto = async (): Promise<void> => {
+    const grantedcamera = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.CAMERA,
+    );
+    const grantedStorage = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+    );
+
+    if (
+      grantedcamera === PermissionsAndroid.RESULTS.GRANTED &&
+      grantedStorage === PermissionsAndroid.RESULTS.GRANTED
+    ) {
+      launchCamera({mediaType: 'photo', includeBase64: true}, response => {
+        if (response) {
+          let {assets} = response;
+
+          if (assets) {
+            setPhoto(assets[0]!);
+          } else {
+            setPhoto(null);
+          }
+        }
       });
+    }
   };
 
   const handleSignUp = () => {
@@ -233,7 +263,7 @@ const Registration = ({navigation}: any) => {
     db.transaction(function (tx) {
       tx.executeSql(
         'INSERT INTO table_user (user_fname, user_lname, user_email,user_address,user_image) VALUES (?,?,?,?,?)',
-        [fname, lname, email, address, JSON.stringify(filePath)],
+        [fname, lname, email, address, photo?.uri],
         (tx, results) => {
           console.log('Results', results.rowsAffected);
           if (results.rowsAffected > 0) {
@@ -289,251 +319,221 @@ const Registration = ({navigation}: any) => {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <KeyboardAwareScrollView style={{backgroundColor: 'orange'}}>
-        <View style={styles.root}>
-          <SafeAreaView style={styles.safeAreaView}>
-            <KeyboardAvoidingView
-              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              style={styles.content}>
-              <View>
-                <View style={styles.searchSection}>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Enter your First Name here"
-                    value={fname}
-                    keyboardType="default"
-                    onChangeText={handleFName}
-                    underlineColor="transparent"
-                  />
-                </View>
-                {fnameValid ? (
-                  <Text style={styles.textFailed}>
-                    First name can't be empty
-                  </Text>
-                ) : (
-                  <Text style={styles.textFailed}> </Text>
-                )}
+    <ScrollView style={{backgroundColor: 'orange'}}>
+      <View style={styles.root}>
+        <SafeAreaView style={styles.safeAreaView}>
+          <View>
+            <TextComponent text="First Name*" />
 
-                <Text style={{marginLeft: 10, fontWeight: 'bold'}}>
-                  LastName*
-                </Text>
-                <View style={styles.searchSection}>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Enter your Last Name here"
-                    value={lname}
-                    keyboardType="default"
-                    onChangeText={handleLName}
-                    underlineColor="transparent"
-                  />
-                </View>
-                {lnameValid ? (
-                  <Text style={styles.textFailed}>
-                    Last Name can't be empty
-                  </Text>
-                ) : (
-                  <Text style={styles.textFailed}> </Text>
-                )}
+            <View style={styles.searchSection}>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your First Name here"
+                value={fname}
+                keyboardType="default"
+                onChangeText={handleFName}
+                underlineColor="transparent"
+              />
+            </View>
+            {fnameValid ? (
+              <Text style={styles.textFailed}>First name can't be empty</Text>
+            ) : (
+              <Text style={styles.textFailed}> </Text>
+            )}
 
-                <Text style={{marginLeft: 10, fontWeight: 'bold'}}>
-                  Phone Number*
-                </Text>
-                <View style={styles.searchSection}>
-                  <TextInput
-                    style={styles.input}
-                    keyboardType="phone-pad"
-                    maxLength={10}
-                    placeholder="Enter your 10 digit mobile number"
-                    value={phone}
-                    onChangeText={handleNumber}
-                    underlineColor="transparent"
-                  />
-                </View>
-                {phoneValid ? (
-                  <Text style={styles.textFailed}>
-                    Phone number must contain 10 digits
-                  </Text>
-                ) : (
-                  <Text style={styles.textFailed}> </Text>
-                )}
+            <TextComponent text="Last Name*" />
+            <View style={styles.searchSection}>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your Last Name here"
+                value={lname}
+                keyboardType="default"
+                onChangeText={handleLName}
+                underlineColor="transparent"
+              />
+            </View>
+            {lnameValid ? (
+              <Text style={styles.textFailed}>Last Name can't be empty</Text>
+            ) : (
+              <Text style={styles.textFailed}> </Text>
+            )}
 
-                <Text style={{marginLeft: 10, fontWeight: 'bold'}}>Email*</Text>
-                <View style={styles.searchSection}>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Email"
-                    value={email}
-                    keyboardType="default"
-                    autoCapitalize="none"
-                    onChangeText={handleCheckEmail}
-                  />
-                </View>
+            <TextComponent text="Phone Number*" />
+            <View style={styles.searchSection}>
+              <TextInput
+                style={styles.input}
+                keyboardType="phone-pad"
+                maxLength={10}
+                placeholder="Enter your 10 digit mobile number"
+                value={phone}
+                onChangeText={handleNumber}
+                underlineColor="transparent"
+              />
+            </View>
+            {phoneValid ? (
+              <Text style={styles.textFailed}>
+                Phone number must contain 10 digits
+              </Text>
+            ) : (
+              <Text style={styles.textFailed}> </Text>
+            )}
 
-                {emailValid ? (
-                  <Text style={styles.textFailed}>Wrong format email</Text>
-                ) : (
-                  <Text style={styles.textFailed}> </Text>
-                )}
-                <Text style={{marginLeft: 10, fontWeight: 'bold'}}>
-                  Gender*
-                </Text>
-                <View
-                  style={{
-                    flex: 1,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginTop: 5,
-                  }}>
-                  <Text style={styles.gender}>Male</Text>
-                  <RadioButton
-                    value="Male"
-                    status={checked === 'Male' ? 'checked' : 'unchecked'}
-                    onPress={() => setChecked('Male')}
-                  />
-                  <Text style={styles.gender}>Female</Text>
-                  <RadioButton
-                    value="Female"
-                    status={checked === 'Female' ? 'checked' : 'unchecked'}
-                    onPress={() => setChecked('Female')}
-                  />
-                </View>
+            <TextComponent text="Email*" />
+            <View style={styles.searchSection}>
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                value={email}
+                keyboardType="default"
+                autoCapitalize="none"
+                onChangeText={handleCheckEmail}
+              />
+            </View>
 
-                <Text style={{marginLeft: 10, fontWeight: 'bold'}}>
-                  Password*
-                </Text>
+            {emailValid ? (
+              <Text style={styles.textFailed}>Wrong format email</Text>
+            ) : (
+              <Text style={styles.textFailed}> </Text>
+            )}
+            <TextComponent text="Gender*" />
+            <View
+              style={{
+                flex: 1,
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginTop: 5,
+              }}>
+              <TextComponent text="Male*" />
+              <RadioButton
+                value="Male"
+                status={checked === 'Male' ? 'checked' : 'unchecked'}
+                onPress={() => setChecked('Male')}
+              />
+              <TextComponent text="Female*" />
+              <RadioButton
+                value="Female"
+                status={checked === 'Female' ? 'checked' : 'unchecked'}
+                onPress={() => setChecked('Female')}
+              />
+            </View>
 
-                <View style={styles.searchSection}>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Password"
-                    value={pass}
-                    onChangeText={handlePass}
-                  />
-                </View>
+            <TextComponent text="Password*" />
 
-                {passValid ? (
-                  <Text style={styles.textFailed}>
-                    Password can't be too short
-                  </Text>
-                ) : (
-                  <Text style={styles.textFailed}> </Text>
-                )}
+            <View style={styles.searchSection}>
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
+                value={pass}
+                onChangeText={handlePass}
+              />
+            </View>
 
-                <Text style={{marginLeft: 10, fontWeight: 'bold'}}>
-                  Confirm Password*
-                </Text>
-                <View style={styles.searchSection}>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Confirm Password"
-                    value={confirmpass}
-                    onChangeText={handleConfirmPass}
-                  />
-                </View>
+            {passValid ? (
+              <Text style={styles.textFailed}>Password can't be too short</Text>
+            ) : (
+              <Text style={styles.textFailed}> </Text>
+            )}
 
-                {confirmValid ? (
-                  <Text style={styles.textFailed}>
-                    Confirm password can't be matched
-                  </Text>
-                ) : (
-                  <Text style={styles.textFailed} />
-                )}
-                <Text style={{marginLeft: 10, fontWeight: 'bold'}}>
-                  Education*
-                </Text>
+            <TextComponent text="Confirm Password*" />
+            <View style={styles.searchSection}>
+              <TextInput
+                style={styles.input}
+                placeholder="Confirm Password"
+                value={confirmpass}
+                onChangeText={handleConfirmPass}
+              />
+            </View>
 
-                <Dropdown
-                  style={styles.dropdown}
-                  placeholderStyle={styles.placeholderStyle}
-                  selectedTextStyle={styles.selectedTextStyle}
-                  inputSearchStyle={styles.inputSearchStyle}
-                  iconStyle={styles.iconStyle}
-                  data={data}
-                  maxHeight={300}
-                  labelField="label"
-                  valueField="value"
-                  placeholder="Select item"
-                  value={value}
-                  onChange={item => {
-                    setValue(item.value);
-                  }}
-                  renderLeftIcon={() => (
-                    <AntDesign
-                      style={styles.icon}
-                      color="black"
-                      name="Safety"
-                      size={20}
-                    />
-                  )}
+            {confirmValid ? (
+              <Text style={styles.textFailed}>
+                Confirm password can't be matched
+              </Text>
+            ) : (
+              <Text style={styles.textFailed} />
+            )}
+            <TextComponent text="Education*" />
+
+            <Dropdown
+              style={styles.dropdown}
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              inputSearchStyle={styles.inputSearchStyle}
+              iconStyle={styles.iconStyle}
+              data={data}
+              maxHeight={300}
+              labelField="label"
+              valueField="value"
+              placeholder="Select item"
+              value={value}
+              onChange={item => {
+                setValue(item.value);
+              }}
+              renderLeftIcon={() => (
+                <AntDesign
+                  style={styles.icon}
+                  color="black"
+                  name="Safety"
+                  size={20}
                 />
-                <Text
-                  style={{marginLeft: 10, fontWeight: 'bold', marginTop: 10}}>
-                  Date Of Birth*
-                </Text>
+              )}
+            />
+            <View style={{marginTop: 10}}>
+              <TextComponent text="Date of birth*" />
+            </View>
 
-                <TouchableOpacity onPress={showDatePicker}>
-                  <View style={styles.searchSection}>
-                    <Text style={styles.input}>{text}</Text>
-                    <DateTimePickerModal
-                      isVisible={show}
-                      mode="date"
-                      onConfirm={handleConfirm}
-                      onCancel={hideDatePicker}
-                    />
-                  </View>
-                </TouchableOpacity>
-                <View
-                  style={{marginLeft: 10, fontWeight: 'bold', marginTop: 10}}>
-                  <Text>Address*</Text>
-                </View>
-
-                <View style={styles.searchSection}>
-                  <TextInput
-                    style={styles.input}
-                    keyboardType="default"
-                    placeholder="Please enter valid address"
-                    value={address}
-                    underlineColorAndroid="transparent"
-                    onChangeText={handleAddress}
-                    underlineColor="transparent"
-                  />
-                </View>
-                {addressValid ? (
-                  <Text style={styles.textFailed}>
-                    Address can not be empty
-                  </Text>
-                ) : (
-                  <Text style={styles.textFailed}> </Text>
-                )}
-
-                <View style={{alignItems: 'center'}}>
-                  <TouchableOpacity
-                    activeOpacity={0.5}
-                    style={styles.buttonStyle}
-                    onPress={chooseFile}>
-                    <Text style={styles.textStyle}>Choose Image</Text>
-                  </TouchableOpacity>
-
-                  <Image
-                    source={{uri: filePath.uri}}
-                    style={styles.imageStyle}
-                  />
-                  {/* <Text style={styles.textStyle}>{filePath.uri}</Text> */}
-                </View>
+            <TouchableOpacity onPress={showDatePicker}>
+              <View style={styles.searchSection}>
+                <Text style={styles.input}>{text}</Text>
+                <DateTimePickerModal
+                  isVisible={show}
+                  mode="date"
+                  onConfirm={handleConfirm}
+                  onCancel={hideDatePicker}
+                />
               </View>
+            </TouchableOpacity>
 
-              <SizedBox height={20} />
-              <TouchableOpacity onPress={onSubmit}>
-                <View style={styles.button}>
-                  <Text style={styles.buttonTitle}>Submit</Text>
-                </View>
+            <TextComponent text="Address*" />
+
+            <View style={styles.searchSection}>
+              <TextInput
+                style={styles.input}
+                keyboardType="default"
+                placeholder="Please enter valid address"
+                value={address}
+                underlineColorAndroid="transparent"
+                onChangeText={handleAddress}
+                underlineColor="transparent"
+              />
+            </View>
+            {addressValid ? (
+              <Text style={styles.textFailed}>Address can not be empty</Text>
+            ) : (
+              <Text style={styles.textFailed}> </Text>
+            )}
+
+            <View style={{alignItems: 'center'}}>
+              <TouchableOpacity
+                activeOpacity={0.5}
+                style={styles.buttonStyle}
+                onPress={handleChoosePhoto}>
+                <Text style={styles.textStyle}>Choose Image</Text>
               </TouchableOpacity>
-            </KeyboardAvoidingView>
-          </SafeAreaView>
-        </View>
-      </KeyboardAwareScrollView>
-    </TouchableWithoutFeedback>
+
+              <Image source={{uri: photo?.uri}} style={styles.imageStyle} />
+              {/* <Text style={styles.textStyle}>{filePath.uri}</Text> */}
+            </View>
+          </View>
+
+          <SizedBox height={10} />
+          <TouchableOpacity onPress={onSubmit}>
+            <View style={styles.button}>
+              <Text style={styles.buttonTitle}>Submit</Text>
+            </View>
+          </TouchableOpacity>
+        </SafeAreaView>
+      </View>
+    </ScrollView>
   );
 };
 
@@ -544,8 +544,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgb(93, 95, 222)',
     borderRadius: 8,
-    height: 48,
+    height: 40,
     justifyContent: 'center',
+    marginBottom: 10,
+    marginLeft: 10,
+    marginRight: 10,
   },
   buttonTitle: {
     color: '#FFFFFF',
@@ -555,9 +558,9 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 20,
     justifyContent: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 32,
   },
   forgotPasswordContainer: {
     alignItems: 'flex-end',
@@ -579,6 +582,7 @@ const styles = StyleSheet.create({
   },
   root: {
     flex: 1,
+    marginTop: 10,
   },
   safeAreaView: {
     flex: 1,
@@ -626,7 +630,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
 
-    margin: 10,
+    margin: 15,
     height: 40,
   },
   gender: {
@@ -670,9 +674,10 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   imageStyle: {
-    width: '100%',
+    width: '40%',
     height: 40,
-    margin: 5,
+    alignContent: 'center',
+    marginTop: 10,
   },
   buttonStyle: {
     alignItems: 'center',
