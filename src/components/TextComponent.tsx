@@ -7,7 +7,7 @@ export const TextComponent = ({text}) => {
       <Text
         style={{
           paddingLeft: '2%',
-          color: 'black',
+          color: 'white',
           marginLeft: 10,
           fontWeight: 'bold',
         }}>

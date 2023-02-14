@@ -8,6 +8,7 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
+  ImageBackground,
 } from 'react-native';
 
 import {openDatabase} from 'react-native-sqlite-storage';
@@ -28,6 +29,7 @@ function useStyles() {
       overflow: 'hidden',
       borderWidth: 2,
       borderColor: 'white',
+      alignSelf: 'center',
     },
 
     buttonTitle: {
@@ -59,7 +61,6 @@ function useStyles() {
       width: 80,
     },
     root: {
-      backgroundColor: 'orange',
       flex: 1,
     },
     safeAreaView: {
@@ -114,6 +115,10 @@ function useStyles() {
       paddingVertical: 10,
       fontSize: 12,
     },
+    image: {
+      flex: 1,
+      justifyContent: 'center',
+    },
   });
 }
 
@@ -128,10 +133,13 @@ var db = openDatabase(
 const ListScreen = ({navigation}: any) => {
   const styles = useStyles();
   const [flatListItems, setFlatListItems] = useState<any>([]);
+  const image = {
+    uri: 'https://i.picsum.photos/id/7/4728/3168.jpg?hmac=c5B5tfYFM9blHHMhuu4UKmhnbZoJqrzNOP9xjkV4w3o',
+  };
 
   useEffect(() => {
     db.transaction(tx => {
-      tx.executeSql('SELECT * FROM table_user', [], (tx, results) => {
+      tx.executeSql('SELECT * FROM table_user ', [], (tx, results) => {
         var temp = [];
         for (let i = 0; i < results.rows.length; ++i)
           temp.push(results.rows.item(i));
@@ -144,9 +152,9 @@ const ListScreen = ({navigation}: any) => {
     return (
       <View
         style={{
-          height: 1,
+          height: 2,
           width: '100%',
-          backgroundColor: 'black',
+          backgroundColor: 'white',
         }}
       />
     );
@@ -180,9 +188,19 @@ const ListScreen = ({navigation}: any) => {
               style={styles.profileImg}
             />
             <View style={{flexDirection: 'column', padding: 15}}>
-              <Text>Name: {item.user_fname + ' ' + item.user_lname}</Text>
-              <Text>Email: {item.user_email}</Text>
-              <Text>Address: {item.user_address}</Text>
+              <Text style={{color: 'white'}}>
+                Name: {item.user_fname + ' ' + item.user_lname}
+              </Text>
+              <Text style={{color: 'white'}}>Email: {item.user_email}</Text>
+              <Text style={{color: 'white'}}>Phone No: {item.user_phone}</Text>
+              <Text style={{color: 'white'}}>Address: {item.user_address}</Text>
+              <Text style={{color: 'white'}}>Gender: {item.user_gender}</Text>
+              <Text style={{color: 'white'}}>
+                Date of birth: {item.user_dob}
+              </Text>
+              <Text style={{color: 'white'}}>
+                Education: {item.user_education}
+              </Text>
             </View>
           </View>
         </TouchableOpacity>
@@ -192,14 +210,16 @@ const ListScreen = ({navigation}: any) => {
 
   return (
     <View style={styles.root}>
-      <SafeAreaView style={styles.safeAreaView}>
-        <FlatList
-          data={flatListItems}
-          ItemSeparatorComponent={listViewItemSeparator}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({item}) => listItemView(item)}
-        />
-      </SafeAreaView>
+      <ImageBackground source={image} resizeMode="cover" style={styles.image}>
+        <SafeAreaView style={styles.safeAreaView}>
+          <FlatList
+            data={flatListItems}
+            ItemSeparatorComponent={listViewItemSeparator}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({item}) => listItemView(item)}
+          />
+        </SafeAreaView>
+      </ImageBackground>
     </View>
   );
 };

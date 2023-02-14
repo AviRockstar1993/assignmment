@@ -26,14 +26,16 @@ function useStyles() {
       alignItems: 'center',
       backgroundColor: 'rgb(93, 95, 222)',
       borderRadius: 8,
-      height: 48,
-      justifyContent: 'center',
+      height: 40,
+      margin: 10,
     },
     buttonTitle: {
       color: '#FFFFFF',
-      fontSize: 17,
+      fontSize: 16,
       fontWeight: '600',
       lineHeight: 22,
+      paddingTop: 5,
+      paddingBottom: 10,
     },
     content: {
       flex: 1,
@@ -63,9 +65,18 @@ function useStyles() {
       backgroundColor: 'orange',
       flex: 1,
     },
+
     safeAreaView: {
       flex: 1,
+      marginTop: 10,
+      justifyContent: 'center',
     },
+    alignment: {
+      flex: 1,
+      justifyContent: 'center',
+      margin: 10,
+    },
+
     subtitle: {
       color: 'rgba(235, 235, 245, 0.6)',
       fontSize: 17,
@@ -111,6 +122,7 @@ const Login: React.FC = ({navigation}: any) => {
   const [pass, setPass] = useState<String>('');
   const [seePassword, setSeePassword] = useState<Boolean>(false);
   const [checkValidEmail, setCheckValidEmail] = useState<Boolean>(false);
+  const [passwordVisible, setPasswordVisible] = useState<Boolean>(true);
 
   const styles = useStyles();
 
@@ -124,7 +136,7 @@ const Login: React.FC = ({navigation}: any) => {
           if (res.rows.length == 0) {
             txn.executeSql('DROP TABLE IF EXISTS table_user', []);
             txn.executeSql(
-              'CREATE TABLE IF NOT EXISTS table_user(user_id INTEGER PRIMARY KEY AUTOINCREMENT, user_fname VARCHAR(20), user_lname VARCHAR(20), user_email VARCHAR(255), user_address VARCHAR(255),user_image VARCHAR(255))',
+              'CREATE TABLE IF NOT EXISTS table_user(user_id INTEGER PRIMARY KEY AUTOINCREMENT, user_fname VARCHAR(20), user_lname VARCHAR(20), user_phone VARCHAR(255), user_email VARCHAR(255), user_address VARCHAR(255),user_image VARCHAR(255),user_gender VARCHAR(255),user_dob VARCHAR(255),user_education VARCHAR(255),user_register VARCHAR(255))',
               [],
             );
           }
@@ -220,53 +232,53 @@ const Login: React.FC = ({navigation}: any) => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.root}>
         <SafeAreaView style={styles.safeAreaView}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.content}>
-            <View style={styles.alignment}>
-              <TextInput
-                style={{marginTop: 10}}
-                label="Email"
-                value={email}
-                autoCapitalize="none"
-                mode="outlined"
-                onChangeText={handleCheckEmail}
-              />
-              {checkValidEmail ? (
-                <Text style={styles.textFailed}>Wrong format email</Text>
-              ) : (
-                <Text style={styles.textFailed}> </Text>
-              )}
-              <TextInput
-                style={{marginTop: 10}}
-                label="Password"
-                value={pass}
-                mode="outlined"
-                onChangeText={handlePass}
-              />
-              {seePassword ? (
-                <Text style={styles.textFailed}>
-                  Password can't be too short
-                </Text>
-              ) : (
-                <Text style={styles.textFailed}> </Text>
-              )}
-            </View>
+          <View style={styles.alignment}>
+            <TextInput
+              style={{marginTop: 10}}
+              label="Email"
+              value={email}
+              autoCapitalize="none"
+              mode="outlined"
+              onChangeText={handleCheckEmail}
+            />
+            {checkValidEmail ? (
+              <Text style={styles.textFailed}>Wrong format email</Text>
+            ) : (
+              <Text style={styles.textFailed}> </Text>
+            )}
+            <TextInput
+              style={{marginTop: 10}}
+              label="Password"
+              value={pass}
+              secureTextEntry={passwordVisible}
+              right={
+                <TextInput.Icon
+                  name={passwordVisible ? 'eye-off' : 'eye'}
+                  onPress={() => setPasswordVisible(!passwordVisible)}
+                />
+              }
+              mode="outlined"
+              onChangeText={handlePass}
+            
+            {seePassword ? (
+              <Text style={styles.textFailed}>Password can't be too short</Text>
+            ) : (
+              <Text style={styles.textFailed}> </Text>
+            )}
+          </View>
 
-            <SizedBox height={20} />
-            <TouchableOpacity onPress={onSubmit}>
-              <View style={styles.button}>
-                <Text style={styles.buttonTitle}>Log in</Text>
-              </View>
-            </TouchableOpacity>
-            <SizedBox height={16} />
-            <TouchableOpacity
-              onPress={() => navigation.navigate('RegistrationPage')}>
-              <View style={{alignItems: 'center'}}>
-                <Text style={styles.buttonTitle}>New User? Register Here</Text>
-              </View>
-            </TouchableOpacity>
-          </KeyboardAvoidingView>
+          <SizedBox height={10} />
+          <TouchableOpacity onPress={onSubmit}>
+            <View style={styles.button}>
+              <Text style={styles.buttonTitle}>Log in</Text>
+            </View>
+          </TouchableOpacity>
+          <SizedBox height={16} />
+          <TouchableOpacity onPress={() => navigation.navigate('Registration')}>
+            <View style={{alignItems: 'center'}}>
+              <Text style={styles.buttonTitle}>New User? Register Here</Text>
+            </View>
+          </TouchableOpacity>
         </SafeAreaView>
       </View>
     </TouchableWithoutFeedback>
